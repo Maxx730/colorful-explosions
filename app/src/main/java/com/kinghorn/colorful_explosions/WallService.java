@@ -33,7 +33,7 @@ public class WallService extends WallpaperService {
     }
 
     class WallEngine extends Engine {
-        private int framerate = 60;
+        private int framerate = 60, frame = 0;
         private final Handler handler = new Handler();
         private int PAN_SPEED, SHADE_AMOUNT;
         private ArrayList<Explosion> exps = new ArrayList<>();
@@ -98,7 +98,7 @@ public class WallService extends WallpaperService {
 
                     for(Explosion exp : exps) {
                         //exp.drawCircle(canvas);
-                        exp.drawFrame(canvas);
+                        exp.drawFrame(canvas, this.frame);
                     }
                 }
             } finally {

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Explosion {
-    private int x, y, frame = 0, rows = 8, cols = 10, current_frame = 0, screenWidth, screenHeight;
+    private int x, y, rows = 8, cols = 10, screenWidth, screenHeight;
     private Paint debugPaint;
     private Bitmap source;
     private BitmapFactory.Options options = new BitmapFactory.Options();
@@ -39,7 +39,7 @@ public class Explosion {
         can.drawCircle(this.x, this.y, 20, debugPaint);
     }
 
-    public void drawFrame(Canvas can) {
+    public void drawFrame(Canvas can, int frame) {
         int row = frame / cols;
         int col = frame % cols;
 
