@@ -6,26 +6,32 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Explosion {
-    private int x, y, rows = 8, cols = 10, screenWidth, screenHeight;
+    private int x, y, cols, rows, screenWidth, screenHeight, frames;
+    public int frame = 0;
     private Paint debugPaint;
     private Bitmap source;
     private BitmapFactory.Options options = new BitmapFactory.Options();
-    private ArrayList<Bitmap> frames = new ArrayList<>();
 
-    public Explosion(Context con, int screenWidth, int screenHeight, int resource) {
+    public Explosion(Context con, int screenWidth, int screenHeight, int resource, int rows, int cols) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
+        this.rows = rows;
+        this.cols = cols;
+        this.frames = rows * cols;
 
         this.randomPoint();
         debugPaint = new Paint();
         debugPaint.setStyle(Paint.Style.FILL);
         debugPaint.setColor(Color.RED);
+        debugPaint.setTextSize(48);
 
         this.options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         source = BitmapFactory.decodeResource(con.getResources(), resource, this.options);
@@ -40,37 +46,30 @@ public class Explosion {
     }
 
     public void drawFrame(Canvas can, int frame) {
-        int row = frame / cols;
-        int col = frame % cols;
+        if (can != null) {
+            int col = frame % cols;
+            int row = frame / cols;
+            //this.print("START X ::: " + String.valueOf(row * (this.source.getWidth() / rows)));
+            //this.print("START Y ::: " + String.valueOf(col * (this.source.getHeight() / cols)));
+            int frameWidth = this.source.getWidth() / rows;
+            int frameHeight = this.source.getHeight() / cols;
+            int xStart = col * frameWidth;
+            int yStart = row * frameHeight;
 
-        this.print("ROW: " + String.valueOf(row) + " COL: " + String.valueOf(col));
+            can.drawBitmap(this.source, new Rect(xStart,yStart,xStart + frameWidth,yStart + frameHeight), new RectF(this.x, this.y,  this.x + frameWidth, this.y + frameHeight),null);
+            //can.drawText("FRAME: " + String.valueOf(this.x), this.x + (frameWidth), this.y + (frameHeight), debugPaint);
 
-        Bitmap b = Bitmap.createBitmap(this.source, row * (this.source.getHeight() / rows), col * (this.source.getWidth() / cols), this.source.getWidth() / cols, this.source.getHeight() / rows);
-        can.drawBitmap(b, this.x, this.y, null);
+            if (frame >= this.frames) {
+                this.frame = 0;
+                this.randomPoint();
+            }
+        } else {
+            this.print("ERROR DRAWING TO CANVAS");
+        }
     }
 
     private void print(String message) {
         Log.d("COLORFUL EXPLOSIONS :: ", message);
-    }
-
-    //Deprecated to save potential memory.
-    private void getFrames(Bitmap source) {
-        this.print("SOURCE SIZE ::: " + String.valueOf(source.getHeight()) + " X " + String.valueOf(source.getWidth()));
-        this.print("ROWS + COLS ::: " + String.valueOf(rows) + " X " + String.valueOf(cols));
-        this.print("ROW HEIGHT + COL HEIGHT ::: " + String.valueOf(source.getHeight() / rows) + " X " + String.valueOf(source.getWidth() / cols));
-
-        for (int c = 0; c < cols; c++) {
-            int col_start = c * (source.getWidth() / cols);
-            int col_width = source.getWidth() / cols;
-            for (int r = 0;r < rows;r++) {
-                int row_start = r * (source.getHeight() / rows);
-                int row_height = source.getHeight() / rows;
-                Bitmap b = Bitmap.createBitmap(source, col_start, row_start, col_width, row_height);
-                frames.add(b);
-            }
-        }
-
-        this.print("FRAME AMOUNT ::: " + String.valueOf(frames.size()));
     }
 
     private void randomPoint() {

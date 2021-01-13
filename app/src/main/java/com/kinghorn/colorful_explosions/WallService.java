@@ -16,7 +16,7 @@ import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 
 public class WallService extends WallpaperService {
-    private int WallWidth, WallHeight;
+    private int WallWidth, WallHeight, currentFrame = 0;
 
     @Override
     public void onCreate() {
@@ -48,15 +48,29 @@ public class WallService extends WallpaperService {
         public WallEngine() {
             //Load preferences and elements here
             SharedPreferences prefs  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_a));
-            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_b));
-            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_c));
-            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_d));
         }
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_a, 10, 8));
+            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_b, 10, 8));
+            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.vortex_a, 10, 9));
+            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.vortex_b, 10, 9));
+            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.multi_a, 10, 9));
+            exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.multi_b, 10, 9));
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_a, 10, 8));
+                    exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.round_b, 10, 8));
+                    exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.vortex_a, 10, 9));
+                    exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.vortex_b, 10, 9));
+                    exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.multi_a, 10, 9));
+                    exps.add(new Explosion(getApplicationContext(), WallWidth, WallHeight, R.drawable.multi_b, 10, 9));
+                }
+            },750);
         }
 
         @Override
@@ -67,6 +81,7 @@ public class WallService extends WallpaperService {
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
+            exps = new ArrayList<>();
             handler.removeCallbacks(WallRunnable);
         }
 
@@ -92,13 +107,19 @@ public class WallService extends WallpaperService {
             try {
                 canvas = holder.lockCanvas();
 
-                if(canvas != null) {
+                if (canvas != null) {
                     //Erase what was on the screen
                     canvas.drawRect(0, 0, WallWidth, WallHeight, p);
 
-                    for(Explosion exp : exps) {
+                    for (Explosion exp : exps) {
                         //exp.drawCircle(canvas);
-                        exp.drawFrame(canvas, this.frame);
+                        exp.drawFrame(canvas, exp.frame += 1);
+
+                        if (this.frame < 101) {
+                            this.frame++;
+                        } else {
+                            this.frame = 0;
+                        }
                     }
                 }
             } finally {
